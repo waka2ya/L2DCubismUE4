@@ -8,7 +8,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class IL2DCubismModule : public IModuleInterface
+class L2DCUBISM_API IL2DCubismModule : public IModuleInterface
 {
 public:
 

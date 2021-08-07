@@ -160,9 +160,9 @@ void L2DCubismRenderNormal::Initialize(CubismModel* csmModel)
     CubismRenderer::Initialize(csmModel);
 
     {
-        const csmInt32 bufferHeight = ClippingManager->GetClippingMaskBufferSize();
+		const csmInt32 bufferHeight = 256; // ClippingManager->GetClippingMaskBufferSize();
 
-        uint32 Flags = 0;
+        ETextureCreateFlags Flags = ETextureCreateFlags::TexCreate_None;
         Flags |= TexCreate_RenderTargetable;
         Flags |= TexCreate_ShaderResource;
         FRHIResourceCreateInfo CreateInfo;
@@ -256,7 +256,7 @@ void L2DCubismRenderNormal::DoDrawModel()
             // レンダリング先テクスチャーをクリアー
             {
                 FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-                RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+                RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
 
                 FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store,
                                           OutTextureRenderTargetResource->TextureRHI);
@@ -268,7 +268,7 @@ void L2DCubismRenderNormal::DoDrawModel()
             FRHITexture2D* OutMaskTextureTarget = MaskTexture;
             // マスク用テクスチャーをクリアー
             {
-                RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, OutMaskTextureTarget);
+                RHICmdList.TransitionResource(ERHIAccess::EWritable, OutMaskTextureTarget);
 
                 FRHIRenderPassInfo RPInfo(OutMaskTextureTarget,
                                           ERenderTargetActions::Clear_Store, OutMaskTextureTarget);
@@ -385,9 +385,10 @@ void L2DCubismRenderNormal::DrawMask(FRHICommandListImmediate& RHICmdList, csmIn
     RHICmdList.BeginRenderPass(RPInfo, TEXT("L2DCubismCreateMask"));
     {
         // Get shaders.
-        TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
-        TShaderMapRef<L2DCubismVertSetupMask> VertexShader(GlobalShaderMap);
-        TShaderMapRef<L2DCubismPixelSetupMask> PixelShader(GlobalShaderMap);
+        // TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
+        auto GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
+        TShaderMapRef<FL2DCubismVertSetupMask> VertexShader(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismPixelSetupMask> PixelShader(GlobalShaderMap);
         // Set the graphic pipeline state.
 
         // チャンネル
@@ -448,13 +449,13 @@ void L2DCubismRenderNormal::DrawMask(FRHICommandListImmediate& RHICmdList, csmIn
         GraphicsPSOInit.PrimitiveType = PT_TriangleList;
         GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GCubismVertexDeclaration.VertexDeclarationRHI;
 
-        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VertexShader);
-        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PixelShader);
+        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();// GETSAFERHISHADER_VERTEX(*VertexShader);
+        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();// GETSAFERHISHADER_PIXEL(*PixelShader);
 
-        VertexShader->SetParameters(RHICmdList, VertexShader->GetVertexShader(), InProjectMatrix,
+        VertexShader->SetParameters(RHICmdList, VertexShader.GetVertexShader(), InProjectMatrix,
                                     InBaseColor, InChannelFlag, TextureRHI);
 
-        PixelShader->SetParameters(RHICmdList, PixelShader->GetPixelShader(), InProjectMatrix,
+        PixelShader->SetParameters(RHICmdList, PixelShader.GetPixelShader(), InProjectMatrix,
                                    InBaseColor, InChannelFlag, TextureRHI);
 
 
@@ -490,7 +491,7 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
                                        FIndexBufferRHIRef IndexBuffer, FTextureRHIRef TextureRHI)
 {
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(EResourceTransitionAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
     
     FRHIRenderPassInfo RPInfo(RenderTargetTexture,
                               ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
@@ -541,17 +542,17 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
         RHICmdList.ApplyCachedRenderTargets(GraphicsPSOInit);
 
         // Get shaders.
-        TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
+        auto GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
 
-        TShaderMapRef<L2DCubismVertNormal> VSNormal(GlobalShaderMap);
-        TShaderMapRef<L2DCubismVertMasked> VSMasked(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismVertNormal> VSNormal(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismVertMasked> VSMasked(GlobalShaderMap);
 
-        TShaderMapRef<L2DCubismPixelNormal> PSNormal(GlobalShaderMap);
-        TShaderMapRef<L2DCubismPixelMasked> PSMasked(GlobalShaderMap);
-        TShaderMapRef<L2DCubismPixelMaskedInverted> PSMaskedInverted(GlobalShaderMap);
-        TShaderMapRef<L2DCubismPixelMaskedInvertedPremult> PSMaskedInvertedPremult(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismPixelNormal> PSNormal(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismPixelMasked> PSMasked(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismPixelMaskedInverted> PSMaskedInverted(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismPixelMaskedInvertedPremult> PSMaskedInvertedPremult(GlobalShaderMap);
 
-        TShaderMapRef<L2DCubismPixelSetupMask> PSSetupMask(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismPixelSetupMask> PSSetupMask(GlobalShaderMap);
 
         // 定数バッファ
         {
@@ -602,29 +603,28 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
             {
                 if (invertedMask)
                 {
-                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VSMasked);
-                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(
-                        *PSMaskedInvertedPremult);
+                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VSMasked.GetVertexShader();// GETSAFERHISHADER_VERTEX(*VSMasked);
+                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PSMaskedInvertedPremult.GetPixelShader();// GETSAFERHISHADER_PIXEL(*PSMaskedInvertedPremult);
 
-                    VSMasked->SetParameters(RHICmdList, VSMasked->GetVertexShader(), InProjectMatrix,
+                    VSMasked->SetParameters(RHICmdList, VSMasked.GetVertexShader(), InProjectMatrix,
                                             InClipMatrix, InBaseColor, InChannelFlag, TextureRHI,
                                             MaskTexture->GetTexture2D());
 
-                    PSMaskedInvertedPremult->SetParameters(RHICmdList, PSMaskedInvertedPremult->GetPixelShader(),
+                    PSMaskedInvertedPremult->SetParameters(RHICmdList, PSMaskedInvertedPremult.GetPixelShader(),
                                                            InProjectMatrix, InClipMatrix,
                                                            InBaseColor, InChannelFlag, TextureRHI,
                                                            MaskTexture->GetTexture2D());
                 }
                 else
                 {
-                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VSMasked);
-                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PSMaskedInverted);
+                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VSMasked.GetVertexShader();
+                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PSMaskedInverted.GetPixelShader();
 
-                    VSMasked->SetParameters(RHICmdList, VSMasked->GetVertexShader(), InProjectMatrix,
+                    VSMasked->SetParameters(RHICmdList, VSMasked.GetVertexShader(), InProjectMatrix,
                                             InClipMatrix, InBaseColor, InChannelFlag, TextureRHI,
                                             MaskTexture->GetTexture2D());
 
-                    PSMaskedInverted->SetParameters(RHICmdList, PSMaskedInverted->GetPixelShader(), InProjectMatrix,
+                    PSMaskedInverted->SetParameters(RHICmdList, PSMaskedInverted.GetPixelShader(), InProjectMatrix,
                                                     InClipMatrix,
                                                     InBaseColor, InChannelFlag, TextureRHI,
                                                     MaskTexture->GetTexture2D());
@@ -634,28 +634,28 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
             {
                 if (invertedMask)
                 {
-                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VSMasked);
-                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PSMaskedInverted);
+                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VSMasked.GetVertexShader();
+                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PSMaskedInverted.GetPixelShader();
 
-                    VSMasked->SetParameters(RHICmdList, VSMasked->GetVertexShader(), InProjectMatrix,
+                    VSMasked->SetParameters(RHICmdList, VSMasked.GetVertexShader(), InProjectMatrix,
                                             InClipMatrix, InBaseColor, InChannelFlag, TextureRHI,
                                             MaskTexture->GetTexture2D());
 
-                    PSMaskedInverted->SetParameters(RHICmdList, PSMaskedInverted->GetPixelShader(), InProjectMatrix,
+                    PSMaskedInverted->SetParameters(RHICmdList, PSMaskedInverted.GetPixelShader(), InProjectMatrix,
                                                     InClipMatrix,
                                                     InBaseColor, InChannelFlag, TextureRHI,
                                                     MaskTexture->GetTexture2D());
                 }
                 else
                 {
-                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VSMasked);
-                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PSMasked);
+                    GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VSMasked.GetVertexShader();
+                    GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PSMasked.GetPixelShader();
 
-                    VSMasked->SetParameters(RHICmdList, VSMasked->GetVertexShader(), InProjectMatrix,
+                    VSMasked->SetParameters(RHICmdList, VSMasked.GetVertexShader(), InProjectMatrix,
                                             InClipMatrix, InBaseColor, InChannelFlag, TextureRHI,
                                             MaskTexture->GetTexture2D());
 
-                    PSMasked->SetParameters(RHICmdList, PSMasked->GetPixelShader(), InProjectMatrix, InClipMatrix,
+                    PSMasked->SetParameters(RHICmdList, PSMasked.GetPixelShader(), InProjectMatrix, InClipMatrix,
                                             InBaseColor, InChannelFlag, TextureRHI, MaskTexture->GetTexture2D());
                 }
             }
@@ -664,28 +664,28 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
         {
             if (premult)
             {
-                GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VSNormal);
-                GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PSMaskedInvertedPremult);
+                GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VSNormal.GetVertexShader();
+                GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PSMaskedInvertedPremult.GetPixelShader();
 
-                VSNormal->SetParameters(RHICmdList, VSNormal->GetVertexShader(), InProjectMatrix,
+                VSNormal->SetParameters(RHICmdList, VSNormal.GetVertexShader(), InProjectMatrix,
                                         InClipMatrix, InBaseColor, InChannelFlag, TextureRHI,
                                         MaskTexture->GetTexture2D());
 
-                PSMaskedInvertedPremult->SetParameters(RHICmdList, PSMaskedInvertedPremult->GetPixelShader(),
+                PSMaskedInvertedPremult->SetParameters(RHICmdList, PSMaskedInvertedPremult.GetPixelShader(),
                                                        InProjectMatrix, InClipMatrix,
                                                        InBaseColor, InChannelFlag, TextureRHI,
                                                        MaskTexture->GetTexture2D());
             }
             else
             {
-                GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VSNormal);
-                GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PSNormal);
+                GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VSNormal.GetVertexShader();
+                GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PSNormal.GetPixelShader();
 
-                VSNormal->SetParameters(RHICmdList, VSNormal->GetVertexShader(), InProjectMatrix,
+                VSNormal->SetParameters(RHICmdList, VSNormal.GetVertexShader(), InProjectMatrix,
                                         InClipMatrix, InBaseColor, InChannelFlag, TextureRHI,
                                         MaskTexture->GetTexture2D());
 
-                PSNormal->SetParameters(RHICmdList, PSNormal->GetPixelShader(), InProjectMatrix, InClipMatrix,
+                PSNormal->SetParameters(RHICmdList, PSNormal.GetPixelShader(), InProjectMatrix, InClipMatrix,
                                         InBaseColor, InChannelFlag, TextureRHI, MaskTexture->GetTexture2D());
             }
         }
@@ -842,19 +842,19 @@ void L2DCubismRenderNormal::DrawTextureForDebug(
         RHICmdList.ApplyCachedRenderTargets(GraphicsPSOInit);
 
         // Get shaders.
-        TShaderMap<FGlobalShaderType>* GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
+        auto GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
 
-        TShaderMapRef<L2DCubismVertNormal> VSNormal(GlobalShaderMap);
-        TShaderMapRef<L2DCubismPixelNormal> PSNormal(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismVertNormal> VSNormal(GlobalShaderMap);
+        TShaderMapRef<FL2DCubismPixelNormal> PSNormal(GlobalShaderMap);
 
-        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = GETSAFERHISHADER_VERTEX(*VSNormal);
-        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = GETSAFERHISHADER_PIXEL(*PSNormal);
+        GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VSNormal.GetVertexShader();
+        GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PSNormal.GetPixelShader();
 
-        VSNormal->SetParameters(RHICmdList, VSNormal->GetVertexShader(), InProjectMatrix,
+        VSNormal->SetParameters(RHICmdList, VSNormal.GetVertexShader(), InProjectMatrix,
                                 InClipMatrix, InBaseColor, InChannelFlag, MaskTexture->GetTexture2D(),
                                 MaskTexture->GetTexture2D());
 
-        PSNormal->SetParameters(RHICmdList, PSNormal->GetPixelShader(), InProjectMatrix, InClipMatrix,
+        PSNormal->SetParameters(RHICmdList, PSNormal.GetPixelShader(), InProjectMatrix, InClipMatrix,
                                 InBaseColor, InChannelFlag, MaskTexture->GetTexture2D(), MaskTexture->GetTexture2D());
 
         GraphicsPSOInit.BlendState = TStaticBlendState<>::GetRHI();

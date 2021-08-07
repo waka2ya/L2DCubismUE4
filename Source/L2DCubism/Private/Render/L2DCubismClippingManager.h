@@ -108,6 +108,8 @@ public:
 
     csmInt32 CurrentFrameNo; ///< マスクテクスチャに与えるフレーム番号
 
+    csmInt32 GetClippingContextListForDrawNum();
+
     TArray<FLinearColor*> ChannelColors;
     //  csmVector<Live2D::Cubism::Framework::Rendering::CubismRenderer::CubismTextureColor*>  ChannelColors;
     csmVector<L2DCubismClippingContext*> ClippingContextListForMask; ///< マスク用クリッピングコンテキストのリスト

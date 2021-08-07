@@ -13,6 +13,8 @@
 
 class FL2DCubismShader : public FGlobalShader
 {
+    DECLARE_INLINE_TYPE_LAYOUT(FL2DCubismShader, NonVirtual);
+    // DECLARE_EXPORTED_TYPE_LAYOUT(FL2DCubismShader, L2DCUBISM_API, NonVirtual);
 public:
     FL2DCubismShader() {}
 
@@ -51,20 +53,20 @@ public:
         SetTextureParameter(RHICmdList, ShaderRHI, MaskTexture, InMaskTexture);
     }
     
-    // FShader interface.
-    virtual bool Serialize(FArchive& Ar) override
-    {
-        bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
-        Ar  << ProjectMatrix
-            << ClipMatrix
-            << BaseColor
-            << ChannelFlag
-            << MainTexture
-            << MainSampler;
-        Ar << MaskTexture;
+    //// FShader interface.
+    //virtual bool Serialize(FArchive& Ar) override
+    //{
+    //    bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
+    //    Ar  << ProjectMatrix
+    //        << ClipMatrix
+    //        << BaseColor
+    //        << ChannelFlag
+    //        << MainTexture
+    //        << MainSampler;
+    //    Ar << MaskTexture;
 
-        return bShaderHasOutdatedParameters;
-    }
+    //    return bShaderHasOutdatedParameters;
+    //}
     
     static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
     {
@@ -77,18 +79,125 @@ public:
     }
     
 protected:
-    FShaderParameter ProjectMatrix;
+    /*FShaderParameter ProjectMatrix;
     FShaderParameter ClipMatrix;
     FShaderParameter BaseColor;
-    FShaderParameter ChannelFlag;
+    FShaderParameter ChannelFlag;*/
+    LAYOUT_FIELD(FShaderParameter, ProjectMatrix);
+    LAYOUT_FIELD(FShaderParameter, ClipMatrix);
+    LAYOUT_FIELD(FShaderParameter, BaseColor);
+    LAYOUT_FIELD(FShaderParameter, ChannelFlag);
 
-    FShaderResourceParameter MainTexture;
-    FShaderResourceParameter MainSampler;
-    FShaderResourceParameter MaskTexture;
+    //FShaderResourceParameter MainTexture;
+    //FShaderResourceParameter MainSampler;
+    //FShaderResourceParameter MaskTexture;
+	LAYOUT_FIELD(FShaderResourceParameter, MainTexture);
+	LAYOUT_FIELD(FShaderResourceParameter, MainSampler);
+	LAYOUT_FIELD(FShaderResourceParameter, MaskTexture);
 };
+
+class L2DCubismVertNormal : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismVertNormal);
+public:
+	L2DCubismVertNormal() {}
+
+	L2DCubismVertNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{}
+};
+
+
+class L2DCubismVertMasked : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismVertMasked);
+public:
+	L2DCubismVertMasked() {}
+
+	L2DCubismVertMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{}
+};
+
+class L2DCubismPixelNormal : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismPixelNormal);
+public:
+	L2DCubismPixelNormal() {}
+
+	L2DCubismPixelNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+class L2DCubismPixelMasked : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismPixelMasked);
+public:
+	L2DCubismPixelMasked() {}
+
+	L2DCubismPixelMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+
+class L2DCubismPixelMaskedInverted : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismPixelMaskedInverted);
+public:
+	L2DCubismPixelMaskedInverted() {}
+
+	L2DCubismPixelMaskedInverted(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+class L2DCubismPixelMaskedPremult : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismPixelMaskedPremult);
+public:
+	L2DCubismPixelMaskedPremult() {}
+
+	L2DCubismPixelMaskedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+class L2DCubismPixelNormalPremult : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismPixelNormalPremult);
+public:
+	L2DCubismPixelNormalPremult() {}
+
+	L2DCubismPixelNormalPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+
+class L2DCubismPixelMaskedInvertedPremult : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(L2DCubismPixelMaskedInvertedPremult);
+public:
+	L2DCubismPixelMaskedInvertedPremult() {}
+
+	L2DCubismPixelMaskedInvertedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
 
 class FL2DCubismMaskShader : public FGlobalShader
 {
+    DECLARE_INLINE_TYPE_LAYOUT(FL2DCubismMaskShader, NonVirtual);
+    // DECLARE_EXPORTED_TYPE_LAYOUT(FL2DCubismMaskShader, L2DCUBISM_API, NonVirtual);
 public:
     FL2DCubismMaskShader() {}
 
@@ -121,18 +230,18 @@ public:
         SetSamplerParameter(RHICmdList, ShaderRHI, MainSampler, TStaticSamplerState<SF_Bilinear, AM_Wrap, AM_Wrap, AM_Wrap>::GetRHI());
     }
 
-    // FShader interface.
-    virtual bool Serialize(FArchive& Ar) override
-    {
-        bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
-        Ar << ProjectMatrix;
-        Ar << BaseColor;
-        Ar << ChannelFlag;
-        Ar << MainTexture;
-        Ar << MainSampler;
+    //// FShader interface.
+    //virtual bool Serialize(FArchive& Ar) override
+    //{
+    //    bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
+    //    Ar << ProjectMatrix;
+    //    Ar << BaseColor;
+    //    Ar << ChannelFlag;
+    //    Ar << MainTexture;
+    //    Ar << MainSampler;
 
-        return bShaderHasOutdatedParameters;
-    }
+    //    return bShaderHasOutdatedParameters;
+    //}
 
     static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
     {
@@ -145,18 +254,24 @@ public:
     }
 
 protected:
-    FShaderParameter ProjectMatrix;
+    /*FShaderParameter ProjectMatrix;
     FShaderParameter BaseColor;
-    FShaderParameter ChannelFlag;
+    FShaderParameter ChannelFlag;*/
+    LAYOUT_FIELD(FShaderParameter, ProjectMatrix);
+    LAYOUT_FIELD(FShaderParameter, BaseColor);
+    LAYOUT_FIELD(FShaderParameter, ChannelFlag);
 
-    FShaderResourceParameter MainTexture;
-    FShaderResourceParameter MainSampler;
+    /*FShaderResourceParameter MainTexture;
+    FShaderResourceParameter MainSampler;*/
+
+	LAYOUT_FIELD(FShaderResourceParameter, MainTexture);
+	LAYOUT_FIELD(FShaderResourceParameter, MainSampler);
 };
 
 
 class L2DCubismVertSetupMask : public FL2DCubismMaskShader
 {
-    DECLARE_SHADER_TYPE(L2DCubismVertSetupMask, Global);
+    DECLARE_GLOBAL_SHADER(L2DCubismVertSetupMask);
 public:
     L2DCubismVertSetupMask() {}
 
@@ -167,7 +282,7 @@ public:
 
 class L2DCubismPixelSetupMask : public FL2DCubismMaskShader
 {
-    DECLARE_SHADER_TYPE(L2DCubismPixelSetupMask, Global);
+    DECLARE_GLOBAL_SHADER(L2DCubismPixelSetupMask);
 public:
     L2DCubismPixelSetupMask() {}
 
@@ -176,99 +291,4 @@ public:
     {}
 };
 
-class L2DCubismVertNormal : public FL2DCubismShader
-{
-    DECLARE_SHADER_TYPE(L2DCubismVertNormal, Global);
-public:
-    L2DCubismVertNormal() {}
 
-    L2DCubismVertNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {}
-};
-
-
-class L2DCubismVertMasked : public FL2DCubismShader
-{
-    DECLARE_SHADER_TYPE(L2DCubismVertMasked, Global);
-public:
-    L2DCubismVertMasked() {}
-
-    L2DCubismVertMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {}
-};
-
-class L2DCubismPixelNormal : public FL2DCubismShader
-{
-    DECLARE_SHADER_TYPE(L2DCubismPixelNormal, Global);
-public:
-    L2DCubismPixelNormal() {}
-
-    L2DCubismPixelNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {
-    }
-};
-
-class L2DCubismPixelMasked : public FL2DCubismShader
-{
-    DECLARE_SHADER_TYPE(L2DCubismPixelMasked, Global);
-public:
-    L2DCubismPixelMasked() {}
-
-    L2DCubismPixelMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {
-    }
-};
-
-
-class L2DCubismPixelMaskedInverted : public FL2DCubismShader
-{
-    DECLARE_SHADER_TYPE(L2DCubismPixelMaskedInverted, Global);
-public:
-    L2DCubismPixelMaskedInverted() {}
-
-    L2DCubismPixelMaskedInverted(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {
-    }
-};
-
- class L2DCubismPixelMaskedPremult : public FL2DCubismShader
- {
-    DECLARE_SHADER_TYPE(L2DCubismPixelMaskedPremult, Global);
-public:
-    L2DCubismPixelMaskedPremult() {}
-
-    L2DCubismPixelMaskedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {
-    }
-};
-
-class L2DCubismPixelNormalPremult : public FL2DCubismShader
-{
-    DECLARE_SHADER_TYPE(L2DCubismPixelNormalPremult, Global);
-public:
-    L2DCubismPixelNormalPremult() {}
-
-    L2DCubismPixelNormalPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {
-    }
-};
-
-
-class L2DCubismPixelMaskedInvertedPremult : public FL2DCubismShader
-{
-    DECLARE_SHADER_TYPE(L2DCubismPixelMaskedInvertedPremult, Global);
-public:
-    L2DCubismPixelMaskedInvertedPremult() {}
-
-    L2DCubismPixelMaskedInvertedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-        : FL2DCubismShader(Initializer)
-    {
-    }
-};
