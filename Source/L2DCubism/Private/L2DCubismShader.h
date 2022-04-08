@@ -1,4 +1,4 @@
-// Copyright 2020 demuyan
+﻿// Copyright 2020 demuyan
 // SPDX-License-Identifier: MIT
 // Licensed under the MIT Open Source License, for details please see license.txt or the website
 // http://www.opensource.org/licenses/mit-license.php
@@ -35,10 +35,10 @@ public:
     void SetParameters(
         FRHICommandList& RHICmdList, 
         const TShaderRHIParamRef ShaderRHI, 
-        const FMatrix& InProjectMatrix,
-        const FMatrix& InClipMatrix,
-        const FVector4& InBaseColor,
-        const FVector4& InChannelFlag,
+        const FMatrix44f& InProjectMatrix,
+        const FMatrix44f& InClipMatrix,
+        const FVector4f& InBaseColor,
+        const FVector4f& InChannelFlag,
         FTextureRHIRef InMainTexture,
         FTextureRHIRef InMaskTexture
         )
@@ -96,98 +96,98 @@ protected:
 	LAYOUT_FIELD(FShaderResourceParameter, MaskTexture);
 };
 
-class L2DCubismVertNormal : public FL2DCubismShader
+class FL2DCubismVertNormal : public FL2DCubismShader
 {
-	DECLARE_GLOBAL_SHADER(L2DCubismVertNormal);
+	DECLARE_GLOBAL_SHADER(FL2DCubismVertNormal);
 public:
-	L2DCubismVertNormal() {}
+	FL2DCubismVertNormal() {}
 
-	L2DCubismVertNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+	FL2DCubismVertNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
 		: FL2DCubismShader(Initializer)
 	{}
 };
 
 
-class L2DCubismVertMasked : public FL2DCubismShader
+class FL2DCubismVertMasked : public FL2DCubismShader
 {
-	DECLARE_GLOBAL_SHADER(L2DCubismVertMasked);
+	DECLARE_GLOBAL_SHADER(FL2DCubismVertMasked);
 public:
-	L2DCubismVertMasked() {}
+	FL2DCubismVertMasked() {}
 
-	L2DCubismVertMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+	FL2DCubismVertMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
 		: FL2DCubismShader(Initializer)
 	{}
 };
 
-class L2DCubismPixelNormal : public FL2DCubismShader
+class FL2DCubismPixelNormal : public FL2DCubismShader
 {
-	DECLARE_GLOBAL_SHADER(L2DCubismPixelNormal);
+	DECLARE_GLOBAL_SHADER(FL2DCubismPixelNormal);
 public:
-	L2DCubismPixelNormal() {}
+	FL2DCubismPixelNormal() {}
 
-	L2DCubismPixelNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+	FL2DCubismPixelNormal(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
 		: FL2DCubismShader(Initializer)
 	{
 	}
 };
 
-class L2DCubismPixelMasked : public FL2DCubismShader
+class FL2DCubismPixelMasked : public FL2DCubismShader
 {
-	DECLARE_GLOBAL_SHADER(L2DCubismPixelMasked);
+	DECLARE_GLOBAL_SHADER(FL2DCubismPixelMasked);
 public:
-	L2DCubismPixelMasked() {}
+	FL2DCubismPixelMasked() {}
 
-	L2DCubismPixelMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-		: FL2DCubismShader(Initializer)
-	{
-	}
-};
-
-
-class L2DCubismPixelMaskedInverted : public FL2DCubismShader
-{
-	DECLARE_GLOBAL_SHADER(L2DCubismPixelMaskedInverted);
-public:
-	L2DCubismPixelMaskedInverted() {}
-
-	L2DCubismPixelMaskedInverted(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-		: FL2DCubismShader(Initializer)
-	{
-	}
-};
-
-class L2DCubismPixelMaskedPremult : public FL2DCubismShader
-{
-	DECLARE_GLOBAL_SHADER(L2DCubismPixelMaskedPremult);
-public:
-	L2DCubismPixelMaskedPremult() {}
-
-	L2DCubismPixelMaskedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
-		: FL2DCubismShader(Initializer)
-	{
-	}
-};
-
-class L2DCubismPixelNormalPremult : public FL2DCubismShader
-{
-	DECLARE_GLOBAL_SHADER(L2DCubismPixelNormalPremult);
-public:
-	L2DCubismPixelNormalPremult() {}
-
-	L2DCubismPixelNormalPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+	FL2DCubismPixelMasked(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
 		: FL2DCubismShader(Initializer)
 	{
 	}
 };
 
 
-class L2DCubismPixelMaskedInvertedPremult : public FL2DCubismShader
+class FL2DCubismPixelMaskedInverted : public FL2DCubismShader
 {
-	DECLARE_GLOBAL_SHADER(L2DCubismPixelMaskedInvertedPremult);
+	DECLARE_GLOBAL_SHADER(FL2DCubismPixelMaskedInverted);
 public:
-	L2DCubismPixelMaskedInvertedPremult() {}
+	FL2DCubismPixelMaskedInverted() {}
 
-	L2DCubismPixelMaskedInvertedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+	FL2DCubismPixelMaskedInverted(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+class FL2DCubismPixelMaskedPremult : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(FL2DCubismPixelMaskedPremult);
+public:
+	FL2DCubismPixelMaskedPremult() {}
+
+	FL2DCubismPixelMaskedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+class FL2DCubismPixelNormalPremult : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(FL2DCubismPixelNormalPremult);
+public:
+	FL2DCubismPixelNormalPremult() {}
+
+	FL2DCubismPixelNormalPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+		: FL2DCubismShader(Initializer)
+	{
+	}
+};
+
+
+class FL2DCubismPixelMaskedInvertedPremult : public FL2DCubismShader
+{
+	DECLARE_GLOBAL_SHADER(FL2DCubismPixelMaskedInvertedPremult);
+public:
+	FL2DCubismPixelMaskedInvertedPremult() {}
+
+	FL2DCubismPixelMaskedInvertedPremult(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
 		: FL2DCubismShader(Initializer)
 	{
 	}
@@ -216,9 +216,9 @@ public:
     void SetParameters(
         FRHICommandList& RHICmdList,
         const TShaderRHIParamRef ShaderRHI,
-        const FMatrix& InProjectMatrix,
-        const FVector4& InBaseColor,
-        const FVector4& InChannelFlag,
+        const FMatrix44f& InProjectMatrix,
+        const FVector4f& InBaseColor,
+        const FVector4f& InChannelFlag,
         FTextureRHIRef InMainTexture
     )
     {
@@ -269,24 +269,24 @@ protected:
 };
 
 
-class L2DCubismVertSetupMask : public FL2DCubismMaskShader
+class FL2DCubismVertSetupMask : public FL2DCubismMaskShader
 {
-    DECLARE_GLOBAL_SHADER(L2DCubismVertSetupMask);
+    DECLARE_GLOBAL_SHADER(FL2DCubismVertSetupMask);
 public:
-    L2DCubismVertSetupMask() {}
+    FL2DCubismVertSetupMask() {}
 
-    L2DCubismVertSetupMask(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+    FL2DCubismVertSetupMask(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
         : FL2DCubismMaskShader(Initializer)
     {}
 };
 
-class L2DCubismPixelSetupMask : public FL2DCubismMaskShader
+class FL2DCubismPixelSetupMask : public FL2DCubismMaskShader
 {
-    DECLARE_GLOBAL_SHADER(L2DCubismPixelSetupMask);
+    DECLARE_GLOBAL_SHADER(FL2DCubismPixelSetupMask);
 public:
-    L2DCubismPixelSetupMask() {}
+    FL2DCubismPixelSetupMask() {}
 
-    L2DCubismPixelSetupMask(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+    FL2DCubismPixelSetupMask(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
         : FL2DCubismMaskShader(Initializer)
     {}
 };

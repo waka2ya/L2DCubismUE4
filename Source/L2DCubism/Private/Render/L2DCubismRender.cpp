@@ -27,9 +27,9 @@ bool L2DCubismRender::IsCulling() const
     return bCulling;
 }
 
-FMatrix L2DCubismRender::ConvertToFMatrix(CubismMatrix44& InCubismMartix)
+FMatrix44f L2DCubismRender::ConvertToFMatrix(CubismMatrix44& InCubismMartix)
 {
-    FMatrix OutMatrix;
+    FMatrix44f OutMatrix;
     auto CubismMatirix = InCubismMartix.GetArray();
 
     for (size_t j = 0; j < 4; j++)

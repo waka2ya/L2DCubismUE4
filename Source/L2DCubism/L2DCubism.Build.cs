@@ -110,14 +110,14 @@ namespace UnrealBuildTool.Rules
         {
             bool IsLibrarySupported = false;
 
-            if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
+            if (Target.Platform == UnrealTargetPlatform.Win64)
             {
                 IsLibrarySupported = true;
 
                 // Cubism3SDK Core
 
                 string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x86_64" : "x86";
-                string LibrariesPath = Path.Combine(CoreSDKPath, "lib", "windows", PlatformString, "141");
+                string LibrariesPath = Path.Combine(CoreSDKPath, "lib", "windows", PlatformString, "142");
 
                 Console.WriteLine("... LibrariesPath -> " + LibrariesPath);
 

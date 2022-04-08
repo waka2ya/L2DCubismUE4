@@ -1,4 +1,4 @@
-// Copyright 2020 demuyan
+ï»¿// Copyright 2020 demuyan
 // SPDX-License-Identifier: MIT
 // Licensed under the MIT Open Source License, for details please see license.txt or the website
 // http://www.opensource.org/licenses/mit-license.php
@@ -30,7 +30,7 @@ class FCubismIndexBufferNew : public FIndexBuffer
 public:
     virtual void InitRHI() override
     {
-        FRHIResourceCreateInfo CreateInfo;
+        FRHIResourceCreateInfo CreateInfo(TEXT("L2DCubismRenderNormalVertex"));
         IndexBufferRHI = RHICreateIndexBuffer(sizeof(int16), uint16(NumIndices) * sizeof(int16), BUF_Static,
                                               CreateInfo);
     }
@@ -57,8 +57,8 @@ class L2DCubismRenderNormal : public Rendering::CubismRenderer
     friend class CubismClippingManager;
 
 public:
-    TMap<int32, FVertexBufferRHIRef> VertexBuffers;
-    TMap<int32, FIndexBufferRHIRef> IndexBuffers;
+    TMap<int32, FBufferRHIRef> VertexBuffers;
+    TMap<int32, FBufferRHIRef> IndexBuffers;
 
     TMap<int32, UTexture2D*> Textures;
 
@@ -86,26 +86,26 @@ public:
     void Rendering(CubismModel* csmModel, UTextureRenderTarget2D* RenderTarget2D);
 
     /**
-     * @brief   ƒ‚ƒfƒ‹‚ğ•`‰æ‚·‚éÀÛ‚Ìˆ—
+     * @brief   ãƒ¢ãƒ‡ãƒ«ã‚’æç”»ã™ã‚‹å®Ÿéš›ã®å‡¦ç†
     *
     */
     virtual void DoDrawModel() override;
     void DrawMask(FRHICommandListImmediate& RHICmdList, csmInt32 indexCount, csmInt32 vertexCount,
                   csmUint16* indexArray,
-                  csmFloat32* vertexArray, csmFloat32* uvArray, FVertexBufferRHIRef VertexBuffer,
-                  FIndexBufferRHIRef IndexBuffer, FTextureRHIRef TextureRHI, FRHITexture2D* OutTextureRenderTargetMask);
+                  csmFloat32* vertexArray, csmFloat32* uvArray, FBufferRHIRef VertexBuffer,
+                  FBufferRHIRef IndexBuffer, FTextureRHIRef TextureRHI, FRHITexture2D* OutTextureRenderTargetMask);
     void DrawTarget(FRHICommandListImmediate& RHICmdList, FTextureRenderTargetResource* OutTextureRenderTargetResource,
                     csmInt32 indexCount, csmInt32 vertexCount, csmFloat32* vertexArray,
                     csmFloat32* uvArray, csmFloat32 opacity, CubismRenderer::CubismTextureColor& modelColorRGBA,
                     CubismRenderer::CubismBlendMode colorBlendMode, csmBool invertedMask,
-                    FVertexBufferRHIRef VertexBuffer,
-                    FIndexBufferRHIRef IndexBuffer, FTextureRHIRef TextureRHI);
+                    FBufferRHIRef VertexBuffer,
+                    FBufferRHIRef IndexBuffer, FTextureRHIRef TextureRHI);
     void BindTexture(csmUint32 modelTextureAssign, UTexture2D* textureView);
 
     void SetTextureRenderTarget2D(UTextureRenderTarget2D* p);
     UTextureRenderTarget2D* GetTextureRenderTarget2D() const;
-    FVertexBufferRHIRef GetVertexBuffer(csmInt32 vertexCount, csmFloat32* vertexArray, csmFloat32* uvArray);
-    FIndexBufferRHIRef GetIndexBuffer(csmInt32 indexCount, csmUint16* indexArray);
+    FBufferRHIRef GetVertexBuffer(csmInt32 vertexCount, csmFloat32* vertexArray, csmFloat32* uvArray);
+    FBufferRHIRef GetIndexBuffer(csmInt32 indexCount, csmUint16* indexArray);
     virtual void DrawMesh(csmInt32 textureNo, csmInt32 indexCount, csmInt32 vertexCount
                           , csmUint16* indexArray, csmFloat32* vertexArray, csmFloat32* uvArray
                           , csmFloat32 opacity, CubismBlendMode colorBlendMode, csmBool invertedMask) override;
@@ -134,41 +134,41 @@ private:
     L2DCubismRenderNormal& operator=(const L2DCubismRenderNormal&);
 
     /**
-     * @brief   ƒ‚ƒfƒ‹•`‰æ’¼‘O‚ÌƒXƒe[ƒg‚ğ•Û‚·‚é
+     * @brief   ãƒ¢ãƒ‡ãƒ«æç”»ç›´å‰ã®ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ä¿æŒã™ã‚‹
     */
     virtual void SaveProfile() override;
 
     /**
-     * @brief   ƒ‚ƒfƒ‹•`‰æ’¼‘O‚ÌƒXƒe[ƒg‚ğ•Û‚·‚é
+     * @brief   ãƒ¢ãƒ‡ãƒ«æç”»ç›´å‰ã®ã‚¹ãƒ†ãƒ¼ãƒˆã‚’ä¿æŒã™ã‚‹
     */
     virtual void RestoreProfile() override;
 
     /**
-     * @brief   ƒ}ƒXƒNƒeƒNƒXƒ`ƒƒ‚É•`‰æ‚·‚éƒNƒŠƒbƒsƒ“ƒOƒRƒ“ƒeƒLƒXƒg‚ğæ“¾‚·‚éB
+     * @brief   ãƒã‚¹ã‚¯ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«æç”»ã™ã‚‹ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’å–å¾—ã™ã‚‹ã€‚
      *
-     * @return  ƒ}ƒXƒNƒeƒNƒXƒ`ƒƒ‚É•`‰æ‚·‚éƒNƒŠƒbƒsƒ“ƒOƒRƒ“ƒeƒLƒXƒg
+     * @return  ãƒã‚¹ã‚¯ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«æç”»ã™ã‚‹ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
      */
     L2DCubismClippingContext* GetClippingContextBufferForMask() const;
 
     /**
-     * @brief   ‰æ–Êã‚É•`‰æ‚·‚éƒNƒŠƒbƒsƒ“ƒOƒRƒ“ƒeƒLƒXƒg‚ğƒZƒbƒg‚·‚éB
+     * @brief   ç”»é¢ä¸Šã«æç”»ã™ã‚‹ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’ã‚»ãƒƒãƒˆã™ã‚‹ã€‚
      */
     void SetClippingContextBufferForDraw(L2DCubismClippingContext* clip);
 
     /**
-     * @brief   ‰æ–Êã‚É•`‰æ‚·‚éƒNƒŠƒbƒsƒ“ƒOƒRƒ“ƒeƒLƒXƒg‚ğæ“¾‚·‚éB
+     * @brief   ç”»é¢ä¸Šã«æç”»ã™ã‚‹ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆã‚’å–å¾—ã™ã‚‹ã€‚
      *
-     * @return  ‰æ–Êã‚É•`‰æ‚·‚éƒNƒŠƒbƒsƒ“ƒOƒRƒ“ƒeƒLƒXƒg
+     * @return  ç”»é¢ä¸Šã«æç”»ã™ã‚‹ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
      */
     L2DCubismClippingContext* GetClippingContextBufferForDraw() const;
 
-    FVertexBufferRHIRef VertexBufferRHI;
-    FIndexBufferRHIRef IndexBufferRHI;
+    FBufferRHIRef VertexBufferRHI;
+    FBufferRHIRef IndexBufferRHI;
 
-    TArray<csmInt32> SortedDrawableIndexList; ///< •`‰æƒIƒuƒWƒFƒNƒg‚ÌƒCƒ“ƒfƒbƒNƒX‚ğ•`‰æ‡‚É•À‚×‚½ƒŠƒXƒg
+    TArray<csmInt32> SortedDrawableIndexList; ///< æç”»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’æç”»é †ã«ä¸¦ã¹ãŸãƒªã‚¹ãƒˆ
     TSharedPtr<class L2DCubismClippingManager> ClippingManager;
 
     UTextureRenderTarget2D* TextureRenderTarget2D;
-    L2DCubismClippingContext* ClippingContextBufferForMask; ///< ƒ}ƒXƒNƒeƒNƒXƒ`ƒƒ‚É•`‰æ‚·‚é‚½‚ß‚ÌƒNƒŠƒbƒsƒ“ƒOƒRƒ“ƒeƒLƒXƒg
-    L2DCubismClippingContext* ClippingContextBufferForDraw; ///< ‰æ–Êã•`‰æ‚·‚é‚½‚ß‚ÌƒNƒŠƒbƒsƒ“ƒOƒRƒ“ƒeƒLƒXƒg
+    L2DCubismClippingContext* ClippingContextBufferForMask; ///< ãƒã‚¹ã‚¯ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«æç”»ã™ã‚‹ãŸã‚ã®ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+    L2DCubismClippingContext* ClippingContextBufferForDraw; ///< ç”»é¢ä¸Šæç”»ã™ã‚‹ãŸã‚ã®ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
 };

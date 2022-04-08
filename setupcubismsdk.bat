@@ -1,7 +1,7 @@
 @echo off
 setlocal
-set sdkfile=CubismSdkForNative-4-r.1.zip
-set extractFolder=CubismSdkForNative-4-r.1
+set sdkfile=CubismSdkForNative-4-r.4.zip
+set extractFolder=CubismSdkForNative-4-r.4
 set targetBaseFolder=Source\
 set cur=%CD%
 cd /d %~dp0

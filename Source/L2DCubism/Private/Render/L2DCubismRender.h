@@ -57,9 +57,9 @@ public:
     bool IsUsingHighPrecisionMask();
 
     /*
-     * FMatrix‚Ö•ÏŠ·
+     * FMatrix44f‚Ö•ÏŠ·
      */
-    static FMatrix ConvertToFMatrix(Csm::CubismMatrix44& InCubismMartix);
+    static FMatrix44f ConvertToFMatrix(Csm::CubismMatrix44& InCubismMartix);
     
 protected:
 

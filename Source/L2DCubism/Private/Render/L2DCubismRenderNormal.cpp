@@ -1,4 +1,4 @@
-// Copyright 2020 demuyan
+ï»¿// Copyright 2020 demuyan
 // SPDX-License-Identifier: MIT
 // Licensed under the MIT Open Source License, for details please see license.txt or the website
 // http://www.opensource.org/licenses/mit-license.php
@@ -35,8 +35,8 @@ using namespace Rendering;
 
 struct FCubismVertex
 {
-    FVector2D Position;
-    FVector2D UV;
+    FVector2f Position;
+    FVector2f UV;
 
     FCubismVertex(float x, float y, float z, float w)
         : Position(x, y)
@@ -70,9 +70,9 @@ TGlobalResource<FCubismVertexDeclaration> GCubismVertexDeclaration;
 void FCubismVertexBuffer::InitRHI()
 {
     // create a static vertex buffer
-    FRHIResourceCreateInfo CreateInfo;
+    FRHIResourceCreateInfo CreateInfo(TEXT("FCubismVertexBuffer"));
     VertexBufferRHI = RHICreateVertexBuffer(sizeof(FCubismVertex) * 4, BUF_Static, CreateInfo);
-    void* VoidPtr = RHILockVertexBuffer(VertexBufferRHI, 0, sizeof(FCubismVertex) * 4, RLM_WriteOnly);
+    void* VoidPtr = RHILockBuffer(VertexBufferRHI, 0, sizeof(FCubismVertex) * 4, RLM_WriteOnly);
     static const FCubismVertex Vertices[4] =
     {
         FCubismVertex(-0.9, -0.9, 0, 0),
@@ -81,17 +81,18 @@ void FCubismVertexBuffer::InitRHI()
         FCubismVertex(+0.9, +0.9, 1, 1),
     };
     FMemory::Memcpy(VoidPtr, Vertices, sizeof(FCubismVertex) * 4);
-    RHIUnlockVertexBuffer(VertexBufferRHI);
+    RHIUnlockBuffer(VertexBufferRHI);
 }
 
 TGlobalResource<FCubismVertexBuffer> GCubismVertexScreenBuffer;
 
 
 L2DCubismRenderNormal::L2DCubismRenderNormal()
-    : ClippingManager(nullptr)
-      , ClippingContextBufferForMask(nullptr)
-      , ClippingContextBufferForDraw(nullptr)
-      , MaskTexture(nullptr)
+    : MaskTexture(nullptr)
+    , ClippingManager(nullptr)
+    , ClippingContextBufferForMask(nullptr)
+    , ClippingContextBufferForDraw(nullptr)
+      
 {
 }
 
@@ -118,28 +119,28 @@ void L2DCubismRenderNormal::CreateBuffers(CubismModel* csmModel)
 
             for (int i = 0; i < DrawableCount; i++)
             {
-                // ’¸“_À•W‚Ìî•ñ‚ª•ÏX‚ª‚ ‚é
+                // é ‚ç‚¹åº§æ¨™ã®æƒ…å ±ãŒéšæ™‚å¤‰æ›´ãŒã‚ã‚‹
                 const csmInt32 VertexCount = csmModel->GetDrawableVertexCount(i);
                 if (0 < VertexCount)
                 {
-                    FRHIResourceCreateInfo CreateInfoVertex;
-                    FVertexBufferRHIRef p = RHICreateVertexBuffer(VertexCount * sizeof(FCubismVertex), BUF_Dynamic,
+                    FRHIResourceCreateInfo CreateInfoVertex(TEXT("L2DCubismRenderNormalVertex"));
+                    FBufferRHIRef p = RHICreateVertexBuffer(VertexCount * sizeof(FCubismVertex), BUF_Dynamic,
                                                                   CreateInfoVertex);
                     VertexBuffers.Add(i, p);
                 }
 
-                // ’¸“_ƒCƒ“ƒfƒbƒNƒX‚ÍŒÅ’è
+                // é ‚ç‚¹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã¯å›ºå®š
                 const csmInt32 IndexCount = csmModel->GetDrawableVertexIndexCount(i);
                 if (0 < IndexCount)
                 {
                     const csmUint16* Indexes = const_cast<csmUint16*>(csmModel->GetDrawableVertexIndices(i));
 
-                    FRHIResourceCreateInfo CreateInfoIndex;
-                    FIndexBufferRHIRef p = RHICreateIndexBuffer(sizeof(csmUint16), sizeof(csmUint16) * IndexCount,
+                    FRHIResourceCreateInfo CreateInfoIndex(TEXT("L2DCubismRenderNormalIndex"));
+                    FBufferRHIRef p = RHICreateIndexBuffer(sizeof(csmUint16), sizeof(csmUint16) * IndexCount,
                                                                 BUF_Static, CreateInfoIndex);
-                    void* LockIndexBuffer = RHILockIndexBuffer(p, 0, sizeof(csmUint16) * IndexCount, RLM_WriteOnly);
+                    void* LockIndexBuffer = RHILockBuffer(p, 0, sizeof(csmUint16) * IndexCount, RLM_WriteOnly);
                     FMemory::Memcpy(LockIndexBuffer, Indexes, sizeof(csmUint16) * IndexCount);
-                    RHIUnlockIndexBuffer(p);
+                    RHIUnlockBuffer(p);
 
                     IndexBuffers.Add(i, p);
                 }
@@ -160,26 +161,27 @@ void L2DCubismRenderNormal::Initialize(CubismModel* csmModel)
     CubismRenderer::Initialize(csmModel);
 
     {
+        // TODO
 		const csmInt32 bufferHeight = 256; // ClippingManager->GetClippingMaskBufferSize();
 
-        ETextureCreateFlags Flags = ETextureCreateFlags::TexCreate_None;
+        ETextureCreateFlags Flags = ETextureCreateFlags::None;
         Flags |= TexCreate_RenderTargetable;
         Flags |= TexCreate_ShaderResource;
-        FRHIResourceCreateInfo CreateInfo;
-        // 1‚ª–³Œøi•`‚©‚ê‚È‚¢j—ÌˆæA0‚ª—LŒøi•`‚©‚ê‚éj—ÌˆæBiƒVƒF[ƒ_‚Å Cd*Cs‚Å0‚É‹ß‚¢’l‚ğ‚©‚¯‚Äƒ}ƒXƒN‚ğì‚éB1‚ğ‚©‚¯‚é‚Æ‰½‚à‹N‚±‚ç‚È‚¢j
+        FRHIResourceCreateInfo CreateInfo(TEXT("L2DCubismRenderNormal"));
+        // 1ãŒç„¡åŠ¹ï¼ˆæã‹ã‚Œãªã„ï¼‰é ˜åŸŸã€0ãŒæœ‰åŠ¹ï¼ˆæã‹ã‚Œã‚‹ï¼‰é ˜åŸŸã€‚ï¼ˆã‚·ã‚§ãƒ¼ãƒ€ã§ Cd*Csã§0ã«è¿‘ã„å€¤ã‚’ã‹ã‘ã¦ãƒã‚¹ã‚¯ã‚’ä½œã‚‹ã€‚1ã‚’ã‹ã‘ã‚‹ã¨ä½•ã‚‚èµ·ã“ã‚‰ãªã„ï¼‰
         CreateInfo.ClearValueBinding = FClearValueBinding(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f));
         MaskTexture = RHICreateTexture2D(bufferHeight, bufferHeight, PF_B8G8R8A8, 1, 1, Flags,
                                          CreateInfo);
     }
 }
 
-// •`‰ææ‚Ìw’è
+// æç”»å…ˆã®æŒ‡å®š
 void L2DCubismRenderNormal::SetTextureRenderTarget2D(UTextureRenderTarget2D* p)
 {
     TextureRenderTarget2D = p;
 }
 
-// •`‰ææ‚Ìæ“¾
+// æç”»å…ˆã®å–å¾—
 UTextureRenderTarget2D* L2DCubismRenderNormal::GetTextureRenderTarget2D() const
 {
     return TextureRenderTarget2D;
@@ -237,7 +239,7 @@ void L2DCubismRenderNormal::DoDrawModel()
     const csmInt32* RenderOrder = GetModel()->GetDrawableRenderOrders();
     const csmInt32 DrawableCount = GetModel()->GetDrawableCount();
 
-    // •`‰æ‡‚Éƒ\[ƒg
+    // æç”»é †ã«ã‚½ãƒ¼ãƒˆ
     for (csmInt32 i = 0; i < DrawableCount; ++i)
     {
         const csmInt32 order = RenderOrder[i];
@@ -249,14 +251,14 @@ void L2DCubismRenderNormal::DoDrawModel()
         {
             check(IsInRenderingThread());
 
-            // ƒŒƒ“ƒ_ƒŠƒ“ƒOæƒeƒNƒXƒ`ƒƒ[
+            // ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å…ˆãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ¼
             FTextureRenderTargetResource* OutTextureRenderTargetResource = GetTextureRenderTarget2D()->
                 GetRenderTargetResource();
 
-            // ƒŒƒ“ƒ_ƒŠƒ“ƒOæƒeƒNƒXƒ`ƒƒ[‚ğƒNƒŠƒA[
+            // ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°å…ˆãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ¼ã‚’ã‚¯ãƒªã‚¢ãƒ¼
             {
                 FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-                RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
+                RHICmdList.TransitionResource(ERHIAccess::WritableMask, RenderTargetTexture);
 
                 FRHIRenderPassInfo RPInfo(RenderTargetTexture, ERenderTargetActions::Clear_Store,
                                           OutTextureRenderTargetResource->TextureRHI);
@@ -264,11 +266,11 @@ void L2DCubismRenderNormal::DoDrawModel()
                 RHICmdList.EndRenderPass();
             }
 
-            // ƒ}ƒXƒN—pƒeƒNƒXƒ`ƒƒ
+            // ãƒã‚¹ã‚¯ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£
             FRHITexture2D* OutMaskTextureTarget = MaskTexture;
-            // ƒ}ƒXƒN—pƒeƒNƒXƒ`ƒƒ[‚ğƒNƒŠƒA[
+            // ãƒã‚¹ã‚¯ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ¼ã‚’ã‚¯ãƒªã‚¢ãƒ¼
             {
-                RHICmdList.TransitionResource(ERHIAccess::EWritable, OutMaskTextureTarget);
+                RHICmdList.TransitionResource(ERHIAccess::WritableMask, OutMaskTextureTarget);
 
                 FRHIRenderPassInfo RPInfo(OutMaskTextureTarget,
                                           ERenderTargetActions::Clear_Store, OutMaskTextureTarget);
@@ -277,7 +279,7 @@ void L2DCubismRenderNormal::DoDrawModel()
                 RHICmdList.EndRenderPass();
             }
 
-            //------------ ƒNƒŠƒbƒsƒ“ƒOƒ}ƒXƒNEƒoƒbƒtƒ@‘Oˆ—•û®‚Ìê‡ ------------
+            //------------ ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ãƒã‚¹ã‚¯ãƒ»ãƒãƒƒãƒ•ã‚¡å‰å‡¦ç†æ–¹å¼ã®å ´åˆ ------------
             if (ClippingManager != nullptr)
             {
                 ClippingManager->SetupClippingContext(RHICmdList, *GetModel(), this);
@@ -286,31 +288,31 @@ void L2DCubismRenderNormal::DoDrawModel()
             const bool bDebugMaskTexture = false;
             if (!bDebugMaskTexture)
             {
-                //@•`‰æ
+                //ã€€æç”»
                 for (csmInt32 j = 0; j < DrawableCount; ++j)
                 {
                     const csmInt32 DrawableIndex = SortedDrawableIndexList[j];
 
-                    // Drawable‚ª•\¦ó‘Ô‚Å‚È‚¯‚ê‚Îˆ—‚ğƒpƒX‚·‚é
+                    // DrawableãŒè¡¨ç¤ºçŠ¶æ…‹ã§ãªã‘ã‚Œã°å‡¦ç†ã‚’ãƒ‘ã‚¹ã™ã‚‹
                     if (!GetModel()->GetDrawableDynamicFlagIsVisible(DrawableIndex))
                     {
                         continue;
                     }
 
-                    // ƒNƒŠƒbƒsƒ“ƒOƒ}ƒXƒN‚ğƒZƒbƒg‚·‚é
+                    // ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ãƒã‚¹ã‚¯ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
                     L2DCubismClippingContext* clipContext = (ClippingManager != nullptr)
                                                                 ? (*ClippingManager->GetClippingContextListForDraw())[
                                                                     DrawableIndex]
                                                                 : nullptr;
 
-                    if (clipContext != nullptr && IsUsingHighPrecisionMask() && clipContext->bUsing) // ƒ}ƒXƒN‚ğ‘‚­•K—v‚ª‚ ‚é
+                    if (clipContext != nullptr && IsUsingHighPrecisionMask() && clipContext->bUsing) // ãƒã‚¹ã‚¯ã‚’æ›¸ãå¿…è¦ãŒã‚ã‚‹
                     {
                         const int clipDrawCount = clipContext->ClippingIdCount;
                         for (int ctx = 0; ctx < clipDrawCount; ctx++)
                         {
                             const int clipDrawIndex = clipContext->ClippingIdList[ctx];
                     
-                            // ’¸“_î•ñ‚ªXV‚³‚ê‚Ä‚¨‚ç‚¸AM—Š«‚ª‚È‚¢ê‡‚Í•`‰æ‚ğƒpƒX‚·‚é
+                            // é ‚ç‚¹æƒ…å ±ãŒæ›´æ–°ã•ã‚Œã¦ãŠã‚‰ãšã€ä¿¡é ¼æ€§ãŒãªã„å ´åˆã¯æç”»ã‚’ãƒ‘ã‚¹ã™ã‚‹
                             if (!GetModel()->GetDrawableDynamicFlagVertexPositionsDidChange(clipDrawIndex))
                             {
                                 continue;
@@ -318,8 +320,8 @@ void L2DCubismRenderNormal::DoDrawModel()
                     
                             IsCulling(GetModel()->GetDrawableCulling(clipDrawIndex) != 0);
                     
-                            // ¡‰ñê—p‚Ì•ÏŠ·‚ğ“K—p‚µ‚Ä•`‚­
-                            // ƒ`ƒƒƒ“ƒlƒ‹‚àØ‚è‘Ö‚¦‚é•K—v‚ª‚ ‚é(A,R,G,B)
+                            // ä»Šå›å°‚ç”¨ã®å¤‰æ›ã‚’é©ç”¨ã—ã¦æã
+                            // ãƒãƒ£ãƒ³ãƒãƒ«ã‚‚åˆ‡ã‚Šæ›¿ãˆã‚‹å¿…è¦ãŒã‚ã‚‹(A,R,G,B)
                             SetClippingContextBufferForMask(clipContext);
                     
                             DrawMeshRHI(
@@ -334,14 +336,14 @@ void L2DCubismRenderNormal::DoDrawModel()
                                 reinterpret_cast<csmFloat32*>(const_cast<csmVector2*>(GetModel()->
                                     GetDrawableVertexUvs(clipDrawIndex))),
                                 GetModel()->GetDrawableOpacity(clipDrawIndex),
-                                CubismBlendMode_Normal, //ƒNƒŠƒbƒsƒ“ƒO‚Í’Êí•`‰æ‚ğ‹­§
-                                false // ƒ}ƒXƒN¶¬‚ÍƒNƒŠƒbƒsƒ“ƒO‚Ì”½“]g—p‚Í‘S‚­ŠÖŒW‚ª‚È‚¢
+                                CubismBlendMode_Normal, //ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã¯é€šå¸¸æç”»ã‚’å¼·åˆ¶
+                                false // ãƒã‚¹ã‚¯ç”Ÿæˆæ™‚ã¯ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ã®åè»¢ä½¿ç”¨ã¯å…¨ãé–¢ä¿‚ãŒãªã„
                             );
                         }
                         SetClippingContextBufferForMask(nullptr);
                     }
                     
-                    // ƒNƒŠƒbƒsƒ“ƒOƒ}ƒXƒN‚ğƒZƒbƒg‚·‚é
+                    // ã‚¯ãƒªãƒƒãƒ”ãƒ³ã‚°ãƒã‚¹ã‚¯ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
                     SetClippingContextBufferForDraw(clipContext);
 
                     IsCulling(GetModel()->GetDrawableCulling(DrawableIndex) != 0);
@@ -365,7 +367,7 @@ void L2DCubismRenderNormal::DoDrawModel()
             }
             else
             {
-                // MaskTexture‚ğDebug‚Ì‚½‚ß‚É•\¦‚·‚é
+                // MaskTextureã‚’Debugã®ãŸã‚ã«è¡¨ç¤ºã™ã‚‹
                 DrawTextureForDebug(
                     RHICmdList,
                     OutTextureRenderTargetResource
@@ -376,7 +378,7 @@ void L2DCubismRenderNormal::DoDrawModel()
 
 void L2DCubismRenderNormal::DrawMask(FRHICommandListImmediate& RHICmdList, csmInt32 indexCount, csmInt32 vertexCount,
                                      csmUint16* indexArray, csmFloat32* vertexArray, csmFloat32* uvArray,
-                                     FVertexBufferRHIRef VertexBuffer, FIndexBufferRHIRef IndexBuffer,
+                                     FBufferRHIRef VertexBuffer, FBufferRHIRef IndexBuffer,
                                      FTextureRHIRef TextureRHI, FRHITexture2D* OutTextureRenderTargetMask)
 {
     FRHIRenderPassInfo RPInfo(OutTextureRenderTargetMask,
@@ -391,41 +393,41 @@ void L2DCubismRenderNormal::DrawMask(FRHICommandListImmediate& RHICmdList, csmIn
         TShaderMapRef<FL2DCubismPixelSetupMask> PixelShader(GlobalShaderMap);
         // Set the graphic pipeline state.
 
-        // ƒ`ƒƒƒ“ƒlƒ‹
+        // ãƒãƒ£ãƒ³ãƒãƒ«
         const csmInt32 channelNo = GetClippingContextBufferForMask()->LayoutChannelNo;
-        // ƒ`ƒƒƒ“ƒlƒ‹‚ğRGBA‚É•ÏŠ·
+        // ãƒãƒ£ãƒ³ãƒãƒ«ã‚’RGBAã«å¤‰æ›
         FLinearColor* colorChannel = GetClippingContextBufferForMask()
                                      ->GetClippingManager()->GetChannelFlagAsColor(channelNo);
 
-        FMatrix InProjectMatrix;
-        FVector4 InChannelFlag;
-        FVector4 InBaseColor;
+        FMatrix44f InProjectMatrix;
+        FVector4f InChannelFlag;
+        FVector4f InBaseColor;
 
-        // ’è”ƒoƒbƒtƒ@
+        // å®šæ•°ãƒãƒƒãƒ•ã‚¡
         {
             csmRectF* rect = GetClippingContextBufferForMask()->LayoutBounds;
 
             InProjectMatrix = L2DCubismRender::ConvertToFMatrix(GetClippingContextBufferForMask()->MatrixForMask);
-            InBaseColor = FVector4(rect->X * 2.0f - 1.0f, rect->Y * 2.0f - 1.0f, rect->GetRight() * 2.0f - 1.0f,
+            InBaseColor = FVector4f(rect->X * 2.0f - 1.0f, rect->Y * 2.0f - 1.0f, rect->GetRight() * 2.0f - 1.0f,
                                    rect->GetBottom() * 2.0f - 1.0f);
-            InChannelFlag = FVector4(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
+            InChannelFlag = FVector4f(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
         }
 
         /*
-         * ’¸“_î•ñ‚ğƒƒ‚ƒŠiGPUj‚ÖƒRƒs[
+         * é ‚ç‚¹æƒ…å ±ã‚’ãƒ¡ãƒ¢ãƒªï¼ˆGPUï¼‰ã¸ã‚³ãƒ”ãƒ¼
          */
-        FCubismVertex* VertexBufferData = static_cast<FCubismVertex*>(RHICmdList.LockVertexBuffer(
+        FCubismVertex* VertexBufferData = static_cast<FCubismVertex*>(RHICmdList.LockBuffer(
             VertexBuffer, 0, vertexCount * sizeof(FCubismVertex), RLM_WriteOnly));
 
         for (int i = 0; i < vertexCount; i++)
         {
-            VertexBufferData[i].Position = FVector2D(vertexArray[2 * i], vertexArray[2 * i + 1]);
-            VertexBufferData[i].UV = FVector2D(uvArray[2 * i], uvArray[2 * i + 1]);
+            VertexBufferData[i].Position = FVector2f(vertexArray[2 * i], vertexArray[2 * i + 1]);
+            VertexBufferData[i].UV = FVector2f(uvArray[2 * i], uvArray[2 * i + 1]);
         }
-        RHICmdList.UnlockVertexBuffer(VertexBuffer);
+        RHICmdList.UnlockBuffer(VertexBuffer);
 
         /*
-         * ƒCƒ“ƒfƒbƒNƒXî•ñ‚ğƒƒ‚ƒŠiGPUj‚ÖƒRƒs[
+         * ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±ã‚’ãƒ¡ãƒ¢ãƒªï¼ˆGPUï¼‰ã¸ã‚³ãƒ”ãƒ¼
          */
         // csmUint16* IndexBufferData = static_cast<csmUint16*>(RHICmdList.LockIndexBuffer(
         //  IndexBuffer, 0, indexCount * sizeof(csmUint16), RLM_WriteOnly));
@@ -438,7 +440,7 @@ void L2DCubismRenderNormal::DrawMask(FRHICommandListImmediate& RHICmdList, csmIn
         /* ----------- */
 
         /*
-         * ƒVƒF[ƒ_[‚Öƒpƒ‰ƒ[ƒ^‚ğ“Ë‚Á‚Ş
+         * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¸ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’çªã£è¾¼ã‚€
          */
         FGraphicsPipelineStateInitializer GraphicsPSOInit;
         RHICmdList.ApplyCachedRenderTargets(GraphicsPSOInit);
@@ -465,7 +467,7 @@ void L2DCubismRenderNormal::DrawMask(FRHICommandListImmediate& RHICmdList, csmIn
             0, 0, 0.f,
             MaskSize, MaskSize, 1.f);
 
-        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
+        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0);
 
         // Set VertextBuffer
         RHICmdList.SetStreamSource(0, VertexBuffer, 0);
@@ -487,11 +489,11 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
                                        csmInt32 indexCount, csmInt32 vertexCount, 
                                        csmFloat32* vertexArray, csmFloat32* uvArray, csmFloat32 opacity,
                                        CubismTextureColor& modelColorRGBA, CubismBlendMode colorBlendMode,
-                                       csmBool invertedMask, FVertexBufferRHIRef VertexBuffer,
-                                       FIndexBufferRHIRef IndexBuffer, FTextureRHIRef TextureRHI)
+                                       csmBool invertedMask, FBufferRHIRef VertexBuffer,
+                                       FBufferRHIRef IndexBuffer, FTextureRHIRef TextureRHI)
 {
     FRHITexture2D* RenderTargetTexture = OutTextureRenderTargetResource->GetRenderTargetTexture();
-    RHICmdList.TransitionResource(ERHIAccess::EWritable, RenderTargetTexture);
+    RHICmdList.TransitionResource(ERHIAccess::WritableMask, RenderTargetTexture);
     
     FRHIRenderPassInfo RPInfo(RenderTargetTexture,
                               ERenderTargetActions::Load_Store, OutTextureRenderTargetResource->TextureRHI);
@@ -500,23 +502,23 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
     {
         // Set the graphic pipeline state.
 
-        FVector4 InBaseColor = FVector4(1.0f, 1.0f, 1.0f, opacity);
+        FVector4f InBaseColor = FVector4f(1.0f, 1.0f, 1.0f, opacity);
 
         /*
-         * ’¸“_î•ñ‚ğƒƒ‚ƒŠiGPUj‚ÖƒRƒs[
+         * é ‚ç‚¹æƒ…å ±ã‚’ãƒ¡ãƒ¢ãƒªï¼ˆGPUï¼‰ã¸ã‚³ãƒ”ãƒ¼
          */
-        FCubismVertex* VertexBufferData = static_cast<FCubismVertex*>(RHICmdList.LockVertexBuffer(
+        FCubismVertex* VertexBufferData = static_cast<FCubismVertex*>(RHICmdList.LockBuffer(
             VertexBuffer, 0, vertexCount * sizeof(FCubismVertex), RLM_WriteOnly));
 
         for (csmInt32 i = 0; i < vertexCount; i++)
         {
-            VertexBufferData[i].Position = FVector2D(vertexArray[2 * i], vertexArray[2 * i + 1]);
-            VertexBufferData[i].UV = FVector2D(uvArray[2 * i], uvArray[2 * i + 1]);
+            VertexBufferData[i].Position = FVector2f(vertexArray[2 * i], vertexArray[2 * i + 1]);
+            VertexBufferData[i].UV = FVector2f(uvArray[2 * i], uvArray[2 * i + 1]);
         }
-        RHICmdList.UnlockVertexBuffer(VertexBuffer);
+        RHICmdList.UnlockBuffer(VertexBuffer);
 
         /*
-         * ƒCƒ“ƒfƒbƒNƒXî•ñ‚ğƒƒ‚ƒŠiGPUj‚ÖƒRƒs[
+         * ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹æƒ…å ±ã‚’ãƒ¡ãƒ¢ãƒªï¼ˆGPUï¼‰ã¸ã‚³ãƒ”ãƒ¼
          */
         // csmUint16* IndexBufferData = static_cast<csmUint16*>(RHICmdList.LockIndexBuffer(
         //  IndexBuffer, 0, indexCount * sizeof(csmUint16), RLM_WriteOnly));
@@ -527,14 +529,14 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
         // RHICmdList.UnlockIndexBuffer(IndexBuffer);
 
         /*
-         * ƒVƒF[ƒ_[‚Öƒpƒ‰ƒ[ƒ^‚ğ“Ë‚Á‚Ş
+         * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¸ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’çªã£è¾¼ã‚€
          */
 
-        FMatrix InProjectMatrix = FMatrix::Identity;
-        FMatrix InClipMatrix = FMatrix::Identity;
-        FVector4 InChannelFlag = FVector4(1, 1, 1, 1);
+        FMatrix44f InProjectMatrix = FMatrix44f::Identity;
+        FMatrix44f InClipMatrix = FMatrix44f::Identity;
+        FVector4f InChannelFlag = FVector4f(1, 1, 1, 1);
 
-        const csmBool masked = GetClippingContextBufferForDraw() != nullptr; // ‚±‚Ì•`‰æƒIƒuƒWƒFƒNƒg‚Íƒ}ƒXƒN‘ÎÛ‚©
+        const csmBool masked = GetClippingContextBufferForDraw() != nullptr; // ã“ã®æç”»ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¯ãƒã‚¹ã‚¯å¯¾è±¡ã‹
         const csmBool premult = IsPremultipliedAlpha();
         const csmInt32 offset = (masked ? (invertedMask ? 2 : 1) : 0) + (IsPremultipliedAlpha() ? 3 : 0);
 
@@ -554,29 +556,29 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
 
         TShaderMapRef<FL2DCubismPixelSetupMask> PSSetupMask(GlobalShaderMap);
 
-        // ’è”ƒoƒbƒtƒ@
+        // å®šæ•°ãƒãƒƒãƒ•ã‚¡
         {
             if (masked)
             {
-                // ViewÀ•W‚ğClippingContext‚ÌÀ•W‚É•ÏŠ·‚·‚é‚½‚ß‚Ìs—ñ‚ğİ’è
+                // Viewåº§æ¨™ã‚’ClippingContextã®åº§æ¨™ã«å¤‰æ›ã™ã‚‹ãŸã‚ã®è¡Œåˆ—ã‚’è¨­å®š
 
                 InClipMatrix = L2DCubismRender::ConvertToFMatrix(GetClippingContextBufferForDraw()->MatrixForDraw);
 
-                // g—p‚·‚éƒJƒ‰[ƒ`ƒƒƒ“ƒlƒ‹‚ğİ’è
+                // ä½¿ç”¨ã™ã‚‹ã‚«ãƒ©ãƒ¼ãƒãƒ£ãƒ³ãƒãƒ«ã‚’è¨­å®š
                 const csmInt32 channelNo = GetClippingContextBufferForDraw()->LayoutChannelNo;
                 FLinearColor* colorChannel = GetClippingContextBufferForDraw()
                                              ->GetClippingManager()->GetChannelFlagAsColor(channelNo);
-                InChannelFlag = FVector4(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
+                InChannelFlag = FVector4f(colorChannel->R, colorChannel->G, colorChannel->B, colorChannel->A);
             }
 
-            // ƒvƒƒWƒFƒNƒVƒ‡ƒ“Mtx
+            // ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³Mtx
             CubismMatrix44 mvp = GetMvpMatrix();
             InProjectMatrix = L2DCubismRender::ConvertToFMatrix(mvp);
-            // F
-            InBaseColor = FVector4(modelColorRGBA.R, modelColorRGBA.G, modelColorRGBA.B, modelColorRGBA.A);
+            // è‰²
+            InBaseColor = FVector4f(modelColorRGBA.R, modelColorRGBA.G, modelColorRGBA.B, modelColorRGBA.A);
         }
 
-        // ƒuƒŒƒ“ƒhƒXƒe[ƒg
+        // ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆ
         switch (colorBlendMode)
         {
         case CubismBlendMode_Normal:
@@ -596,7 +598,7 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
             break;
         }
 
-        // ƒVƒF[ƒ_ƒZƒbƒg
+        // ã‚·ã‚§ãƒ¼ãƒ€ã‚»ãƒƒãƒˆ
         if (masked)
         {
             if (premult)
@@ -701,7 +703,7 @@ void L2DCubismRenderNormal::DrawTarget(FRHICommandListImmediate& RHICmdList,
             0, 0, 0.f,
             OutTextureRenderTargetResource->GetSizeX(), OutTextureRenderTargetResource->GetSizeY(), 1.f);
 
-        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
+        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0);
 
         // Set VertextBuffer
         RHICmdList.SetStreamSource(0, VertexBuffer, 0);
@@ -718,12 +720,12 @@ void L2DCubismRenderNormal::ExecuteDraw(FRHICommandListImmediate& RHICmdList,
                                         csmFloat32* uvArray, csmFloat32 opacity, CubismTextureColor& modelColorRGBA,
                                         CubismBlendMode colorBlendMode, csmBool invertedMask)
 {
-    FVertexBufferRHIRef VertexBuffer = VertexBuffers[drawableIndex];
-    FIndexBufferRHIRef IndexBuffer = IndexBuffers[drawableIndex];
+    FBufferRHIRef VertexBuffer = VertexBuffers[drawableIndex];
+    FBufferRHIRef IndexBuffer = IndexBuffers[drawableIndex];
 
-    FTextureRHIRef TextureRHI = Textures[textureNo]->Resource->TextureRHI;
+    FTextureRHIRef TextureRHI = Textures[textureNo]->GetResource()->TextureRHI;
 
-    if (GetClippingContextBufferForMask() != nullptr) // ƒ}ƒXƒN¶¬
+    if (GetClippingContextBufferForMask() != nullptr) // ãƒã‚¹ã‚¯ç”Ÿæˆæ™‚
     {
         FRHITexture2D* OutTextureRenderTargetMask = MaskTexture;
 
@@ -731,7 +733,7 @@ void L2DCubismRenderNormal::ExecuteDraw(FRHICommandListImmediate& RHICmdList,
                  indexCount, vertexCount, indexArray, vertexArray, uvArray, VertexBuffer, IndexBuffer, TextureRHI,
                  OutTextureRenderTargetMask);
     }
-    else // ƒ}ƒXƒN¶¬ˆÈŠO‚Ìê‡
+    else // ãƒã‚¹ã‚¯ç”Ÿæˆä»¥å¤–ã®å ´åˆ
     {
         DrawTarget(RHICmdList, OutTextureRenderTargetResource, indexCount, vertexCount, vertexArray,
                    uvArray,
@@ -750,10 +752,10 @@ void L2DCubismRenderNormal::DrawMeshRHI(FRHICommandListImmediate& RHICmdList,
 
     if (indexCount == 0)
     {
-        // •`‰æ•¨–³‚µ
+        // æç”»ç‰©ç„¡ã—
         return;
     }
-    // •`‰æ•s—v‚È‚ç•`‰æˆ—‚ğƒXƒLƒbƒv‚·‚é
+    // æç”»ä¸è¦ãªã‚‰æç”»å‡¦ç†ã‚’ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹
     if (opacity <= 0.0f && GetClippingContextBufferForMask() == nullptr)
     {
         return;
@@ -761,7 +763,7 @@ void L2DCubismRenderNormal::DrawMeshRHI(FRHICommandListImmediate& RHICmdList,
 
     CubismTextureColor modelColorRGBA = GetModelColor();
 
-    if (GetClippingContextBufferForMask() == nullptr) // ƒ}ƒXƒN¶¬ˆÈŠO
+    if (GetClippingContextBufferForMask() == nullptr) // ãƒã‚¹ã‚¯ç”Ÿæˆæ™‚ä»¥å¤–
     {
         modelColorRGBA.A *= opacity;
         if (IsPremultipliedAlpha())
@@ -826,15 +828,15 @@ void L2DCubismRenderNormal::DrawTextureForDebug(
     {
         // Set the graphic pipeline state.
 
-        FVector4 InBaseColor = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
+        FVector4f InBaseColor = FVector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         /*
-         * ƒVƒF[ƒ_[‚Öƒpƒ‰ƒ[ƒ^‚ğ“Ë‚Á‚Ş
+         * ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã¸ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’çªã£è¾¼ã‚€
          */
 
-        FMatrix InProjectMatrix;
-        FMatrix InClipMatrix;
-        FVector4 InChannelFlag = FVector4(1, 1, 1, 1);
+        FMatrix44f InProjectMatrix;
+        FMatrix44f InClipMatrix;
+        FVector4f InChannelFlag = FVector4f(1, 1, 1, 1);
         InProjectMatrix.SetIdentity();
         InClipMatrix.SetIdentity();
 
@@ -868,7 +870,7 @@ void L2DCubismRenderNormal::DrawTextureForDebug(
             0, 0, 0.f,
             OutTextureRenderTargetResource->GetSizeX(), OutTextureRenderTargetResource->GetSizeY(), 1.f);
 
-        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit);
+        SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0);
 
         // Set VertextBuffer
         RHICmdList.SetStreamSource(0, GCubismVertexScreenBuffer.VertexBufferRHI, 0);
