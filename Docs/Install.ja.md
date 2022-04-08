@@ -6,8 +6,8 @@
 
 下記のバージョンを利用します。
 
-- UE4.24
-- VisualStudio 2017
+- UE5.0
+- VisualStudio 2019
 - [Cubism SDK for Native]((https://www.live2d.com/download/cubism-sdk/download-native/))
 
 ## UE4のプロジェクトを作成
@@ -45,7 +45,7 @@
 本プラグイン内にあるsetupcubismsdk.batファイルを利用する方法です。
 
 手順は以下の通りです。
- 1. ダウンロードしたCubism SDKのzipファイル(CubismSdkForNative-4-r.1.zip)をプラグインのルートディレクトリにコピーする
+ 1. ダウンロードしたCubism SDKのzipファイル(CubismSdkForNative-4-r.4.zip)をプラグインのルートディレクトリにコピーする
  2. 同じ階層フォルダにあるsetupcubismsdk.batファイルを実行する
 
 batファイル実行後は、ライブラリ、ヘッダ、フレームワークが所定の位置にコピーされます。
@@ -53,7 +53,7 @@ batファイル実行後は、ライブラリ、ヘッダ、フレームワー�
 コマンドで実行する場合は次のようになります。
 
 ```
-> copy CubismSdkForNative-4-r.1.zip 【UE4project】\Plugins\L2DCubism\
+> copy CubismSdkForNative-4-r.4.zip 【UE4project】\Plugins\L2DCubism\
 > cd 【UE4project】\Plugins\L2DCubism\
 > setupcubismsdk.bat
 ```
@@ -62,7 +62,7 @@ batファイル実行後は、ライブラリ、ヘッダ、フレームワー�
 
 セットアップは手動でも行えます。バッチファイルを実行してもうまくいかない場合などはこちらの方法でセットアップしてください。
 
-CubismSdkForNative-4-r.1.zipファイルを展開した後、次のようにコピーを行います。
+CubismSdkForNative-4-r.4.zipファイルを展開した後、次のようにコピーを行います。
 
 - Coreフォルダは、Plugins\L2DCubism\Source\ThirdParty\SDKフォルダへコピー
 - Frameworkフォルダは、Plugins\L2DCubism\Source\L2DCubism\SDKへコピー
@@ -70,7 +70,7 @@ CubismSdkForNative-4-r.1.zipファイルを展開した後、次のようにコ�
 コマンドで実行する場合は次のようになります。
 
 ```
-> cd (CubismSdkForNative-4-r.1.zipを展開したフォルダ)
+> cd (CubismSdkForNative-4-r.4.zipを展開したフォルダ)
 > copy Core 【UE4project】\Plugins\L2DCubism\Source\ThirdParty\SDK
 > copy Framework 【UE4project】\Plugins\L2DCubism\Source\L2DCubism\SDK
 ```
